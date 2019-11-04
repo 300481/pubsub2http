@@ -29,6 +29,7 @@ export GCP_CREATE_TOPIC=TRUE
 export GCP_SUBSCRIPTION_NAME=<yoursubscriptionname>
 export GCP_CREATE_SUBSCRIPTION=TRUE
 export GCP_PROJECT_ID=yourprojectid
+export VERSION=yourpreferredversion
 docker run -d --rm --name=pubsub2http \
     -v credentialsfile-path:containerpath \
     -e POST_URL=${POST_URL} \
@@ -38,5 +39,5 @@ docker run -d --rm --name=pubsub2http \
     -e GCP_SUBSCRIPTION_NAME=${GCP_SUBSCRIPTION_NAME} \
     -e GCP_CREATE_SUBSCRIPTION=${GCP_CREATE_SUBSCRIPTION} \
     -e GCP_PROJECT_ID=${GCP_PROJECT_ID} \
-    300481/pubsub2http:latest
+    300481/pubsub2http:${VERSION}
 ```
