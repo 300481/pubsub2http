@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/300481/mq"
 )
 
 // PubSub2HTTP the struct for handle functions
@@ -41,7 +42,7 @@ func (p *PubSub2HTTP) HandleMessage(ctx context.Context, m *pubsub.Message) {
 		log.Println(err)
 		return
 	}
-	log.Printf("Got Message from PubSub with ID %s", m.ID)
+	log.Printf("Got Message from PubSub [ID: %s]", m.ID)
 
 	request, err := http.NewRequest(message.Method, p.PostURL, bytes.NewReader(message.Body))
 	if err != nil {
@@ -62,11 +63,31 @@ func (p *PubSub2HTTP) HandleMessage(ctx context.Context, m *pubsub.Message) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	log.Printf("Transferred Message [ID: %s] [URL: %s]", m.ID, p.PostURL)
+}
 
-	log.Printf("Transferred Message with ID %s to URL: %s Got Response: %s", m.ID, p.PostURL, string(body))
+// newGCP creates new GCP PubSub consumer struct
+func newGCP() *mq.GCP {
+	return &mq.GCP{
+		CredentialsFile:    os.Getenv("GCP_CREDENTIALS_FILE"),
+		TopicName:          os.Getenv("GCP_TOPIC_NAME"),
+		CreateTopic:        os.Getenv("GCP_CREATE_TOPIC") == "TRUE",
+		SubscriptionName:   os.Getenv("GCP_SUBSCRIPTION_NAME"),
+		CreateSubscription: os.Getenv("GCP_CREATE_SUBSCRIPTION") == "TRUE",
+		ProjectID:          os.Getenv("GCP_PROJECT_ID"),
+	}
+}
+
+// Server starts the server
+func (p *PubSub2HTTP) Serve() {
+	log.Println("Start PubSub2HTTP")
+
+	// create new message queue configuration from environment
+	mq := newGCP()
+
+	// subscribe to the message queue
+	err := mq.Subscribe(p.HandleMessage)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
