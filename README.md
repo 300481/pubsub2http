@@ -25,6 +25,7 @@ Environment Variable     |Description                                 |Valid val
 helm upgrade \
   --install pubsub2http deployments/chart/ \
   --set gcp.auth_file=<your-service-account-json-file-name> \
+  --set env.post_url=<your-http-service> \
   --set env.gcp_topic_name=<your-topic-name> \
   --set env.gcp_subscription_name=<your-subscription-name> \
   --set env.gcp_project_id=<your-project-id> \
