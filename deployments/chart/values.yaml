@@ -1,0 +1,30 @@
+# Default values for chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: 300481/pubsub2http
+  tag: v0.1.0
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 64Mi
+  requests:
+    cpu: 10m
+    memory: 32Mi
+
+env:
+  post_url: http://nginx.default.svc.cluster.local
+  gcp_credentials_file: /tmp/gcp/auth.json
+  gcp_topic_name: none
+  gcp_create_topic: "TRUE"
+  gcp_subscription_name: none
+  gcp_create_subscription: "TRUE"
+  gcp_project_id: none
+
+gcp:
+  auth_file: none

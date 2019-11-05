@@ -19,25 +19,27 @@ Environment Variable     |Description                                 |Valid val
 * account for [Google Cloud Platform](https://cloud.google.com/)
 * Docker
 
-## Start the service
+## Install the service to Kubernetes with Helm
 
 ```bash
-export POST_URL=<yourposturl>
-export GCP_CREDENTIALS_FILE=<filelocation>
-export GCP_TOPIC_NAME=<yourtopicname>
-export GCP_CREATE_TOPIC=TRUE
-export GCP_SUBSCRIPTION_NAME=<yoursubscriptionname>
-export GCP_CREATE_SUBSCRIPTION=TRUE
-export GCP_PROJECT_ID=yourprojectid
-export VERSION=yourpreferredversion
-docker run -d --rm --name=pubsub2http \
-    -v credentialsfile-path:containerpath \
-    -e POST_URL=${POST_URL} \
-    -e GCP_CREDENTIALS_FILE=${GCP_CREDENTIALS_FILE} \
-    -e GCP_TOPIC_NAME=${GCP_TOPIC_NAME} \
-    -e GCP_CREATE_TOPIC=${GCP_CREATE_TOPIC} \
-    -e GCP_SUBSCRIPTION_NAME=${GCP_SUBSCRIPTION_NAME} \
-    -e GCP_CREATE_SUBSCRIPTION=${GCP_CREATE_SUBSCRIPTION} \
-    -e GCP_PROJECT_ID=${GCP_PROJECT_ID} \
-    300481/pubsub2http:${VERSION}
+helm upgrade \
+  --install pubsub2http deployments/chart/ \
+  --set gcp.auth_file=<your-service-account-json-file-name> \
+  --set env.gcp_topic_name=<your-topic-name> \
+  --set env.gcp_subscription_name=<your-subscription-name> \
+  --set env.gcp_project_id=<your-project-id> \
+  --force
 ```
+
+## Helm Chart Values / default values
+
+Value Name                   |Default Value                           |Description
+-----------------------------|----------------------------------------|------------------------------------------------------------
+`env.post_url`               |`http://nginx.default.svc.cluster.local`|HTTP Target to post the GCP Message
+`env.gcp_credentials_file`   |`/tmp/gcp/auth.json` *don't change!*    |The location of the Auth file in the pod
+`env.gcp_topic_name`         |none                                    |Your PubSub Topic Name
+`env.gcp_create_topic`       |`"TRUE"`                                |If set to "TRUE", Topic will be created if not exists
+`env.gcp_subscription_name`  |none                                    |Your Subscription Name
+`env.gcp_create_subscription`|`"TRUE"`                                |If set to "TRUE", Subscription will be created if not exists
+`env.gcp_project_id`         |none                                    |Your GCP Project ID
+`gcp.auth_file`              |none                                    |The local name of your Auth file when installing
